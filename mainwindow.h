@@ -28,12 +28,23 @@ private slots:
     void on_comboBox_serialport_currentIndexChanged(const QString &arg1);
 
 private:
-    void initSerial(QString serialPortName);
+
+    struct resultData {
+        int trace;
+        QString *status;
+        long unsigned int time;
+        resultData *next;
+        resultData *prev;
+    } *results, **resultsLast;
 
     Ui::MainWindow *ui;
     QSerialPort *serialPort;
     QByteArray *serialBuffer;
+    QString *serialReaded;
 
+    void initSerial(QString serialPortName);
+    int parseSerialData(QString *data);
+    int ShowResult(resultData *item);
 };
 
 #endif // MAINWINDOW_H

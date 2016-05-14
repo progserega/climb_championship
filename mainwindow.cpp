@@ -13,37 +13,86 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     serialPort = new QSerialPort;
     serialBuffer = new QByteArray;
+    serialReaded = new QString;
+    results = 0;
+    resultsLast=&results;
     on_pushButton_update_serialport_list_released();
     // Связываем обработчики с событиями в последлвательном порте:
 //    connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::handleNewSerialData);
     //connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData(QByteArray *)));
     connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData()));
     connect(serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),this, &MainWindow::handleSerialError);
+
+    ui->result_table->setShowGrid(true);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+int MainWindow::parseSerialData(QString *data)
+{
+    if(data->at(data->length()-1) == '\n')
+    {
+        resultData **cur=resultsLast;
+        if(*resultsLast)
+        {
+            // не первый элемент (в cur - адрес next-элемента в последнем элементе списка)
+            cur=&((*cur)->next);
+        }
+        *cur = new resultData;
+        memset(*cur,0,sizeof(resultData));
+        (*cur)->prev=*resultsLast;
+        (*cur)->status = new QString;
+        resultsLast=cur;
+
+        QStringList items = data->split(";");
+        for(int index=0; index<items.size(); ++index)
+        {
+            qDebug() << "item[" << index << "]" << items.at(index);
+            QStringList values = items.at(index).split(":");
+            QString key = values.at(0);
+            QString val = values.at(1);
+
+            // заполняем структуру:
+            if(key=="trace")
+            {
+                (*resultsLast)->trace=val.toInt();
+            }
+            else if (key == "time_ms")
+            {
+                (*resultsLast)->time=val.toInt();
+            }
+            else if (key == "result")
+            {
+                (*(*resultsLast)->status)=val;
+            }
+        }
+        qDebug() << "== New result: ==\ntrace:" << (*resultsLast)->trace << "\nstatus: " << (*(*resultsLast)->status) << "\nTime: " << (*resultsLast)->time;
+        return true;
+    }
+    return false;
+}
+int MainWindow::ShowResult(resultData *item)
+{
+    //ui->result_table->
+    return true;
+}
 void MainWindow::handleNewSerialData()
 {
     serialBuffer->append(serialPort->readAll());
+    serialReaded->clear();
+    serialReaded->append(*serialBuffer);
+    qDebug() << QTime::currentTime() << ": " << "read new data from serial port: " << *serialReaded;
+    if(parseSerialData(serialReaded))
+    {
+        // данные обработаны - очищаем буферы:
+        serialBuffer->clear();
+        serialReaded->clear();
+        // добавляем запись в отчёт:
 
-    QString str;
-    str.append(*serialBuffer);
-
-    qDebug() << QTime::currentTime() << ": " << "read new data from port: " << serialBuffer;
-    qDebug() << QTime::currentTime() << ": " << "read new data from port2: " << str;
-/*
-    QMessageBox *pmbx = new QMessageBox;
-    pmbx->setText("new data!: ");
-    pmbx->setInformativeText(str);
-    pmbx->setIcon(QMessageBox::Information);
-    pmbx->setStandardButtons(QMessageBox::Ok | QMessageBox::Escape);
-    pmbx->setDefaultButton(QMessageBox::Ok);
-    pmbx->exec();
-    delete pmbx;
-*/
+    }
 }
 void MainWindow::handleSerialError(QSerialPort::SerialPortError serialPortError)
 {
@@ -111,6 +160,13 @@ void MainWindow::initSerial(QString serialPortName)
     serialPort->setFlowControl(QSerialPort::NoFlowControl);
     ui->pushButton_connect_to_serialport->setDisabled(true);
     qDebug() << QTime::currentTime() << ": " << "Open is normal";
+    qDebug() << "= Connected with parameters =";
+    qDebug() << "Device name            : " << serialPort->portName();
+    qDebug() << "Baud rate              : " << serialPort->baudRate();
+    qDebug() << "Data bits              : " << serialPort->dataBits();
+    qDebug() << "Parity                 : " << serialPort->parity();
+    qDebug() << "Stop bits              : " << serialPort->stopBits();
+    qDebug() << "Flow                   : " << serialPort->flowControl();
 }
 
 void MainWindow::on_comboBox_serialport_currentIndexChanged(const QString &serialPortName)
