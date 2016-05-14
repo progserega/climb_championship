@@ -22,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData(QByteArray *)));
     connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData()));
     connect(serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),this, &MainWindow::handleSerialError);
-
-    ui->result_table->setShowGrid(true);
 }
 
 MainWindow::~MainWindow()
@@ -74,9 +72,20 @@ int MainWindow::parseSerialData(QString *data)
     }
     return false;
 }
-int MainWindow::ShowResult(resultData *item)
+int MainWindow::ShowResult(resultData *data)
 {
-    //ui->result_table->
+    QTableWidgetItem *item = new QTableWidgetItem();
+    item->setText(tr("%1").arg(data->trace));
+    ui->result_table0->setItem(0,0,item);
+
+    item = new QTableWidgetItem();
+    item->setText(*(data->status));
+    ui->result_table0->setItem(0,1,item);
+
+    item = new QTableWidgetItem();
+    item->setText(tr("%1").arg(data->time));
+    ui->result_table0->setItem(0,2,item);
+
     return true;
 }
 void MainWindow::handleNewSerialData()
@@ -91,6 +100,7 @@ void MainWindow::handleNewSerialData()
         serialBuffer->clear();
         serialReaded->clear();
         // добавляем запись в отчёт:
+        ShowResult(*resultsLast);
 
     }
 }
