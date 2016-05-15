@@ -80,7 +80,7 @@ int getStatusKey(int numKey)
 int print_result(struct traceStruct &trace)
 {
   char buf[255];
-  sprintf(buf,"trace:%d;result:%s;time_ms:%lu", trace.id, trace.status, trace.time);
+  sprintf(buf,"trace:%d;result:%s;time_ms:%lu;current_log_ms:%lu", trace.id, trace.status, trace.time,millis());
   Serial.println(buf); 
 }
 
@@ -100,7 +100,7 @@ int checkStateMachine(struct traceStruct &trace)
     case NOT_WORK:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_NOT_WORK; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_NOT_WORK;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
        break;
@@ -108,7 +108,7 @@ int checkStateMachine(struct traceStruct &trace)
     case PREPARE_TO_START:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_PREPARE_TO_START; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_PREPARE_TO_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
       buttonState = getStatusKey(start_key);
@@ -121,7 +121,7 @@ int checkStateMachine(struct traceStruct &trace)
     case ON_START:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_ON_START; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_ON_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
       buttonState = getStatusKey(start_key);
@@ -134,7 +134,7 @@ int checkStateMachine(struct traceStruct &trace)
     case FALSH_START:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_FALSH_START; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_FALSH_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
       trace.state = NOT_WORK;
@@ -147,7 +147,7 @@ int checkStateMachine(struct traceStruct &trace)
     case START:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_START; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
   /*    buttonState = getStatusKey(start_key);
@@ -163,7 +163,7 @@ int checkStateMachine(struct traceStruct &trace)
     case PROCESS:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_PROCESS; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_PROCESS;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
       buttonState = getStatusKey(stop_key);
@@ -180,7 +180,7 @@ int checkStateMachine(struct traceStruct &trace)
     case STOP:
     {
 #ifdef DEBUG
-      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_STOP; time_ms:0",trace.id);
+      sprintf(debug_buf,"trace:%d;result:DEBUG_STATE_STOP;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
       buttonState = getStatusKey(stop_key);
@@ -252,7 +252,7 @@ int serialRead(void)
 
 #ifdef DEBUG
         char debug_buf[255]="";
-        sprintf(debug_buf,"trace:0;result:DEBUG success read serial data - '%s', serialReadBufIndex='%d';time_ms:0",serialReadBuf,serialReadBufIndex);  
+        sprintf(debug_buf,"trace:0;result:DEBUG success read serial data - '%s', serialReadBufIndex='%d';time_ms:0;current_log_ms:%lu",serialReadBuf,serialReadBufIndex,millis());  
         Serial.println(debug_buf); 
 #endif
           serialReadBufIndex=0;
@@ -269,7 +269,7 @@ int serialRead(void)
 #ifdef DEBUG
         char debug_buf[255]="";
         serialReadBuf[serialReadBufIndex-1]=0;
-        sprintf(debug_buf,"trace:0;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0",serialReadBuf);  
+        sprintf(debug_buf,"trace:0;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0;current_log_ms:%lu",serialReadBuf,millis());  
         Serial.println(debug_buf); 
 #endif
 
@@ -319,7 +319,7 @@ int execCommand(char *buf)
   {
 #ifdef DEBUG
     char debug_buf[256]="";
-    sprintf(debug_buf,"trace:0;result:DEBUG unknown command - '%s';time_ms:0",buf);  
+    sprintf(debug_buf,"trace:0;result:DEBUG unknown command - '%s';time_ms:0;current_log_ms:%lu",buf,millis());  
     Serial.println(debug_buf); 
 #endif
     return false;
@@ -333,7 +333,7 @@ void loop(){
   char debug_buf[256]="";
   int button1State = getStatusKey(TRACE_1_START_BUTTON);
   int button2State = getStatusKey(TRACE_1_STOP_BUTTON);
-  sprintf(debug_buf,"trace:%d;result:DEBUG key1=%d, key2=%d;time_ms:0",trace1.id, button1State, button2State);  
+  sprintf(debug_buf,"trace:%d;result:DEBUG key1=%d, key2=%d;time_ms:0;current_log_ms:%lu",trace1.id, button1State, button2State,millis());  
   Serial.println(debug_buf); 
   delay(DEBUG_SLEEP);
 #endif

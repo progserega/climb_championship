@@ -35,49 +35,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-int MainWindow::parseSerialData(QString *data)
-{
-    if(data->at(data->length()-1) == '\n')
-    {
-        resultData **cur=resultsLast;
-        if(*resultsLast)
-        {
-            // не первый элемент (в cur - адрес next-элемента в последнем элементе списка)
-            cur=&((*cur)->next);
-        }
-        *cur = new resultData;
-        memset(*cur,0,sizeof(resultData));
-        (*cur)->prev=*resultsLast;
-        (*cur)->status = new QString;
-        resultsLast=cur;
-
-        QStringList items = data->split(";");
-        for(int index=0; index<items.size(); ++index)
-        {
-            qDebug() << "item[" << index << "]" << items.at(index);
-            QStringList values = items.at(index).split(":");
-            QString key = values.at(0);
-            QString val = values.at(1);
-
-            // заполняем структуру:
-            if(key=="trace")
-            {
-                (*resultsLast)->trace=val.toInt();
-            }
-            else if (key == "time_ms")
-            {
-                (*resultsLast)->time=val.toInt();
-            }
-            else if (key == "result")
-            {
-                (*(*resultsLast)->status)=val;
-            }
-        }
-        qDebug() << "== New result: ==\ntrace:" << (*resultsLast)->trace << "\nstatus: " << (*(*resultsLast)->status) << "\nTime: " << (*resultsLast)->time;
-        return true;
-    }
-    return false;
-}
 int MainWindow::appendResult(resultData *data)
 {
     QTableWidget *result=ui->result_table0;
@@ -114,20 +71,94 @@ int MainWindow::appendResult(resultData *data)
 
     return true;
 }
+int MainWindow::getNextCommand(QString *data, QString *cmd)
+{
+    int index = data->indexOf("\n");
+    if (index == -1)
+    {
+        return false;
+    }
+    else
+    {
+        QString tmp;
+        *cmd = data->left(index+1);
+        tmp = data->right(data->size()-(index+1));
+        *data = tmp;
+        return true;
+    }
+}
+int MainWindow::parseSerialData(QString *data)
+{
+    QString cmd;
+    qDebug() << __FUNCTION__ << ":" << __LINE__ << "input data: '" << *data << "'";
+    while(getNextCommand(data,&cmd))
+    {
+        qDebug() << __FUNCTION__ << ":" << __LINE__ << "current data: '" << *data << "'";
+        qDebug() << "process command: '" << cmd << "'";
+            resultData **cur=resultsLast;
+            if(*resultsLast)
+            {
+                // не первый элемент (в cur - адрес next-элемента в последнем элементе списка)
+                cur=&((*cur)->next);
+            }
+            *cur = new resultData;
+            memset(*cur,0,sizeof(resultData));
+            (*cur)->prev=*resultsLast;
+            (*cur)->status = new QString;
+            resultsLast=cur;
+
+            QStringList items = cmd.split(";");
+            for(int index=0; index<items.size(); ++index)
+            {
+                qDebug() << "item[" << index << "]" << items.at(index);
+                QStringList values = items.at(index).split(":");
+                QString key = values.at(0);
+                QString val = values.at(1);
+
+                // заполняем структуру:
+                if(key=="trace")
+                {
+                    (*resultsLast)->trace=val.toInt();
+                }
+                else if (key == "time_ms")
+                {
+                    (*resultsLast)->time=val.toInt();
+                }
+                else if (key == "result")
+                {
+                    (*(*resultsLast)->status)=val;
+                }
+                else if (key == "current_log_ms")
+                {
+                    (*resultsLast)->change_time_arduino=val.toInt();
+                }
+            }
+            qDebug() << "== New result: ==\ntrace:" << (*resultsLast)->trace << "\nstatus: " << (*(*resultsLast)->status) << "\nTime: " << (*resultsLast)->time << "\nChange time arduino:" << (*resultsLast)->change_time_arduino << "\n==============";
+            // добавляем запись в отчёт:
+            appendResult(*resultsLast);
+        }
+    if(*data == "")
+    {
+        return true;
+    }
+    else
+    {
+        // ещё есть необработанные даныне в буфере
+        return false;
+    }
+}
+
 void MainWindow::handleNewSerialData()
 {
     serialBuffer->append(serialPort->readAll());
     serialReaded->clear();
     serialReaded->append(*serialBuffer);
-    qDebug() << QTime::currentTime() << ": " << "read new data from serial port: " << *serialReaded;
+    //qDebug() << QTime::currentTime() << ": " << "read new data from serial port: " << *serialReaded;
     if(parseSerialData(serialReaded))
     {
         // данные обработаны - очищаем буферы:
         serialBuffer->clear();
         serialReaded->clear();
-        // добавляем запись в отчёт:
-        appendResult(*resultsLast);
-
     }
 }
 void MainWindow::handleSerialError(QSerialPort::SerialPortError serialPortError)

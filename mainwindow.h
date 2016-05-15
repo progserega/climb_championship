@@ -37,6 +37,7 @@ private:
         int trace;
         QString *status;
         long unsigned int time;
+        long unsigned int change_time_arduino;
         resultData *next;
         resultData *prev;
     } *results, **resultsLast;
@@ -50,6 +51,7 @@ private:
     void initSerial(QString serialPortName);
     int parseSerialData(QString *data);
     int appendResult(resultData *item);
+    int getNextCommand(QString *data, QString *cmd);
 };
 
 #endif // MAINWINDOW_H
