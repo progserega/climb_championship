@@ -27,6 +27,10 @@ private slots:
 
     void on_comboBox_serialport_currentIndexChanged(const QString &arg1);
 
+    void on_start_button_released();
+
+    void startLap();
+
 private:
 
     struct resultData {
@@ -41,6 +45,7 @@ private:
     QSerialPort *serialPort;
     QByteArray *serialBuffer;
     QString *serialReaded;
+    QTimer *timer;
 
     void initSerial(QString serialPortName);
     int parseSerialData(QString *data);

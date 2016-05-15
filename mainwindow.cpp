@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QTime>
+#include <QSound>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,11 +19,15 @@ MainWindow::MainWindow(QWidget *parent) :
     results = 0;
     resultsLast=&results;
     on_pushButton_update_serialport_list_released();
+    ui->start_button->setDisabled(true);
     // Связываем обработчики с событиями в последлвательном порте:
 //    connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::handleNewSerialData);
     //connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData(QByteArray *)));
     connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData()));
     connect(serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),this, &MainWindow::handleSerialError);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(startLap()));
 }
 
 MainWindow::~MainWindow()
@@ -189,6 +195,7 @@ void MainWindow::initSerial(QString serialPortName)
     serialPort->setStopBits(QSerialPort::OneStop);
     serialPort->setFlowControl(QSerialPort::NoFlowControl);
     ui->pushButton_connect_to_serialport->setDisabled(true);
+    ui->start_button->setDisabled(false);
     qDebug() << QTime::currentTime() << ": " << "Open is normal";
     qDebug() << "= Connected with parameters =";
     qDebug() << "Device name            : " << serialPort->portName();
@@ -203,4 +210,19 @@ void MainWindow::on_comboBox_serialport_currentIndexChanged(const QString &seria
 {
     ui->pushButton_connect_to_serialport->setEnabled(true);
     serialPort->close();
+}
+
+void MainWindow::on_start_button_released()
+{
+    QSound::play("ring1.wav");
+
+    timer->start(3000);
+    // TODO send внимание to arduino
+}
+
+void MainWindow::startLap()
+{
+    timer->stop();
+    QSound::play("ring2.wav");
+    // TODO send start to arduino
 }
