@@ -212,13 +212,13 @@ int serialRead(void)
         {
           // конец переданной строки
           serialReadBuf[serialReadBufIndex]=0;
-          serialReadBufIndex=0;
-#ifdef DEBUG
-        char debug_buf[1024]="";
-        sprintf(debug_buf,"trace:%d;result:DEBUG success read serial data - '%s';time_ms:0",serialReadBuf);  
-        Serial.println(debug_buf); 
-#endif
 
+//#ifdef DEBUG
+        char debug_buf[1024]="";
+        sprintf(debug_buf,"trace:0;result:DEBUG success read serial data - '%s', serialReadBufIndex='%d';time_ms:0",serialReadBuf,serialReadBufIndex);  
+        Serial.println(debug_buf); 
+//#endif
+          serialReadBufIndex=0;
           return true;
         }
         else
@@ -229,12 +229,12 @@ int serialRead(void)
       else
       {
         // переполнение буфера
-#ifdef DEBUG
+//#ifdef DEBUG
         char debug_buf[1024]="";
         serialReadBuf[serialReadBufIndex-1]=0;
-        sprintf(debug_buf,"trace:%d;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0",serialReadBuf);  
+        sprintf(debug_buf,"trace:0;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0",serialReadBuf);  
         Serial.println(debug_buf); 
-#endif
+//#endif
 
       }
     }
