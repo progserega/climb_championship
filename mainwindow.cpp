@@ -150,14 +150,15 @@ int MainWindow::parseSerialData(QString *data)
 
 void MainWindow::handleNewSerialData()
 {
+    serialBuffer->clear();
     serialBuffer->append(serialPort->readAll());
-    serialReaded->clear();
+    //serialReaded->clear();
     serialReaded->append(*serialBuffer);
     //qDebug() << QTime::currentTime() << ": " << "read new data from serial port: " << *serialReaded;
     if(parseSerialData(serialReaded))
     {
         // данные обработаны - очищаем буферы:
-        serialBuffer->clear();
+        //serialBuffer->clear();
         serialReaded->clear();
     }
 }

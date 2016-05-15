@@ -38,7 +38,8 @@ enum states {
   STOP=3,
   PREPARE_TO_START=4,
   FALSH_START=5,
-  START=6
+  START=6,
+  NOT_ON_START=7
 } st;
 
 char serialReadBuf[255]="";
@@ -128,6 +129,10 @@ int checkStateMachine(struct traceStruct &trace)
       if (buttonState == OFF)
       {
         trace.state = FALSH_START;
+        trace.stopTime=0;
+        trace.startTime=0;
+        sprintf(trace.status,"falsh_start");
+        return SUCCESS;
       }
       break;
     }
@@ -137,12 +142,9 @@ int checkStateMachine(struct traceStruct &trace)
       sprintf(debug_buf,"trace:%d;result:DEBUG_FALSH_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
       Serial.println(debug_buf); 
 #endif
-      trace.state = NOT_WORK;
+      //trace.state = NOT_WORK;
       // result:
-      trace.stopTime=0;
-      trace.startTime=0;
-      sprintf(trace.status,"falsh_start");
-      return SUCCESS;
+      
     }
     case START:
     {
@@ -176,6 +178,17 @@ int checkStateMachine(struct traceStruct &trace)
         digitalWrite(ledPin, LOW);
       }
       break;
+    }
+    case NOT_ON_START:
+    {
+#ifdef DEBUG
+      sprintf(debug_buf,"trace:%d;result:DEBUG_NOT_ON_START;time_ms:0;current_log_ms:%lu",trace.id,millis());
+      Serial.println(debug_buf); 
+#endif
+      trace.state=NOT_WORK;
+      trace.time=0;
+      sprintf(trace.status,"not_on_start_button");
+      return SUCCESS;
     }
     case STOP:
     {
@@ -294,25 +307,19 @@ int execCommand(char *buf)
     {
       trace1.state=START;
     }
-    else
+    else if (trace1.state!=FALSH_START)
     {
       // участник не на стартовой кнопке:
-      trace1.state=NOT_WORK;
-      trace1.time=0;
-      sprintf(trace1.status,"not_on_start_button");
-      print_result(trace1);
+      trace1.state=NOT_ON_START;
     }
     if (trace2.state==ON_START)
     {
       trace2.state=START;
     }
-    else
+    else if (trace2.state!=FALSH_START)
     {
       // участник не на стартовой кнопке:
-      trace2.state=NOT_WORK;
-      trace2.time=0;
-      sprintf(trace2.status,"not_on_start_button");
-      print_result(trace2);
+      trace2.state=NOT_ON_START;
     }
   }
   else
