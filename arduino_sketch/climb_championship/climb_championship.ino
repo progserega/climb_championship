@@ -36,7 +36,8 @@ enum states {
   PROCESS=2,
   STOP=3,
   PREPARE_TO_START=4,
-  FALSH_START=5
+  FALSH_START=5,
+  START=6
 } st;
 
 char serialReadBuf[255]="";
@@ -101,6 +102,14 @@ int checkStateMachine(struct traceStruct &trace)
       sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_NOT_WORK; time_ms:0",trace.id);
       Serial.println(debug_buf); 
 #endif
+       break;
+    }
+    case PREPARE_TO_START:
+    {
+#ifdef DEBUG
+      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_PREPARE_TO_START; time_ms:0",trace.id);
+      Serial.println(debug_buf); 
+#endif
       buttonState = getStatusKey(start_key);
       if (buttonState == ON)
       {
@@ -112,6 +121,32 @@ int checkStateMachine(struct traceStruct &trace)
     {
 #ifdef DEBUG
       sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_ON_START; time_ms:0",trace.id);
+      Serial.println(debug_buf); 
+#endif
+      buttonState = getStatusKey(start_key);
+      if (buttonState == OFF)
+      {
+        trace.state = FALSH_START;
+        break;
+      }
+    }
+    case FALSH_START:
+    {
+#ifdef DEBUG
+      sprintf(debug_buf,"trace:%d; result:DEBUG_FALSH_START; time_ms:0",trace.id);
+      Serial.println(debug_buf); 
+#endif
+      trace.state = NOT_WORK;
+      // result:
+      trace.stopTime=0;
+      trace.startTime=0;
+      sprintf(trace.status,"falsh_start");
+      return SUCCESS;
+    }
+    case START:
+    {
+#ifdef DEBUG
+      sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_START; time_ms:0",trace.id);
       Serial.println(debug_buf); 
 #endif
       buttonState = getStatusKey(start_key);
@@ -244,6 +279,18 @@ int serialRead(void)
 
 int execCommand(char *buf)
 {
+  if(!strcasecmp(buf,"vnimanie"))
+  {
+    // внимание
+    trace1.state=PREPARE_TO_START;
+    trace2.state=PREPARE_TO_START;
+  }
+  else if (!strcasecmp(buf,"start"))
+  {
+    // start
+    trace1.state=START;
+    trace2.state=START;
+  }
 }
 
 void loop(){
