@@ -72,19 +72,39 @@ int MainWindow::parseSerialData(QString *data)
     }
     return false;
 }
-int MainWindow::ShowResult(resultData *data)
+int MainWindow::appendResult(resultData *data)
 {
+    QTableWidget *result=ui->result_table0;
+    QLCDNumber *lcd=ui->trace0_time_lcd;
+    if (data->trace==1)
+    {
+        result=ui->result_table1;
+        lcd=ui->trace1_time_lcd;
+    }
+    int rowNum=result->rowCount();
+    result->setRowCount(rowNum+1);
+
+    result->scrollToBottom();
+
     QTableWidgetItem *item = new QTableWidgetItem();
-    item->setText(tr("%1").arg(data->trace));
-    ui->result_table0->setItem(0,0,item);
+    //item->setText(tr("Участник %1").arg(data->trace));
+    item->setText(tr("Участник %1").arg(rowNum+1));
+    result->setItem(rowNum,0,item);
 
     item = new QTableWidgetItem();
     item->setText(*(data->status));
-    ui->result_table0->setItem(0,1,item);
+    item->setFlags(Qt::NoItemFlags);// Qt::ItemIsEditable);
+    result->setItem(rowNum,1,item);
 
     item = new QTableWidgetItem();
-    item->setText(tr("%1").arg(data->time));
-    ui->result_table0->setItem(0,2,item);
+    item->setText(tr("%1 сек.").arg(((float)data->time)/1000));
+    item->setFlags(Qt::NoItemFlags);// Qt::ItemIsEditable);
+    result->setItem(rowNum,2,item);
+
+    // lcd
+
+    //lcd->display(data->time);
+    lcd->display(tr("%1").arg(((float)data->time)/1000));
 
     return true;
 }
@@ -100,7 +120,7 @@ void MainWindow::handleNewSerialData()
         serialBuffer->clear();
         serialReaded->clear();
         // добавляем запись в отчёт:
-        ShowResult(*resultsLast);
+        appendResult(*resultsLast);
 
     }
 }

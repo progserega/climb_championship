@@ -44,7 +44,7 @@ private:
 
     void initSerial(QString serialPortName);
     int parseSerialData(QString *data);
-    int ShowResult(resultData *item);
+    int appendResult(resultData *item);
 };
 
 #endif // MAINWINDOW_H

@@ -60,7 +60,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QLabel" name="label_trace1">
+          <widget class="QLabel" name="label_trace0">
            <property name="text">
             <string>Трасса 1</string>
            </property>
@@ -70,14 +70,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLCDNumber" name="trace1_time_lcd"/>
+          <widget class="QLCDNumber" name="trace0_time_lcd"/>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QLabel" name="label_trace2">
+          <widget class="QLabel" name="label_trace1">
            <property name="text">
             <string>Трасса 2</string>
            </property>
@@ -87,7 +87,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLCDNumber" name="trace2_time_lcd"/>
+          <widget class="QLCDNumber" name="trace1_time_lcd"/>
          </item>
         </layout>
        </item>
@@ -121,7 +121,7 @@
           <bool>true</bool>
          </property>
          <property name="rowCount">
-          <number>14</number>
+          <number>0</number>
          </property>
          <property name="columnCount">
           <number>3</number>
@@ -138,20 +138,6 @@
          <attribute name="verticalHeaderDefaultSectionSize">
           <number>30</number>
          </attribute>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
          <column/>
          <column/>
          <column/>
@@ -159,8 +145,17 @@
        </item>
        <item>
         <widget class="QTableWidget" name="result_table1">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="showGrid">
+          <bool>false</bool>
+         </property>
          <property name="rowCount">
-          <number>14</number>
+          <number>0</number>
          </property>
          <property name="columnCount">
           <number>3</number>
@@ -168,20 +163,6 @@
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>130</number>
          </attribute>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
-         <row/>
          <column/>
          <column/>
          <column/>
