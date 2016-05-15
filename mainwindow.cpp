@@ -209,20 +209,25 @@ void MainWindow::initSerial(QString serialPortName)
 void MainWindow::on_comboBox_serialport_currentIndexChanged(const QString &serialPortName)
 {
     ui->pushButton_connect_to_serialport->setEnabled(true);
+    ui->start_button->setEnabled(false);
     serialPort->close();
 }
 
 void MainWindow::on_start_button_released()
 {
+    // send внимание to arduino
+    serialPort->write("vnimanie\n");
+
+    // "Внимание":
     QSound::play("ring1.wav");
 
     timer->start(3000);
-    // TODO send внимание to arduino
 }
 
 void MainWindow::startLap()
 {
     timer->stop();
+    // send start to arduino
+    serialPort->write("start\n");
     QSound::play("ring2.wav");
-    // TODO send start to arduino
 }
