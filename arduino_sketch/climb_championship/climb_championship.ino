@@ -80,7 +80,7 @@ int getStatusKey(int numKey)
 int print_result(struct traceStruct &trace)
 {
   char buf[255];
-  sprintf(buf,"trace:%d; result:%s; time_ms:%lu", trace.id, trace.status, trace.time);
+  sprintf(buf,"trace:%d;result:%s;time_ms:%lu", trace.id, trace.status, trace.time);
   Serial.println(buf); 
 }
 
