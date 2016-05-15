@@ -128,8 +128,8 @@ int checkStateMachine(struct traceStruct &trace)
       if (buttonState == OFF)
       {
         trace.state = FALSH_START;
-        break;
       }
+      break;
     }
     case FALSH_START:
     {
@@ -150,14 +150,14 @@ int checkStateMachine(struct traceStruct &trace)
       sprintf(debug_buf,"trace:%d; result:DEBUG_STATE_START; time_ms:0",trace.id);
       Serial.println(debug_buf); 
 #endif
-      buttonState = getStatusKey(start_key);
+  /*    buttonState = getStatusKey(start_key);
       if (buttonState == OFF)
-      {
+      {*/
         trace.startTime=millis();
         trace.state = PROCESS;
         // turn LED on:    
         digitalWrite(ledPin, HIGH);
-      }
+      //}
       break;
     }
     case PROCESS:
@@ -290,15 +290,41 @@ int execCommand(char *buf)
   else if (!strcasecmp(buf,"start"))
   {
     // start
-    if (trace1.state!=FALSH_START)
+    if (trace1.state==ON_START)
     {
       trace1.state=START;
     }
-    if (trace2.state!=FALSH_START)
+    else
+    {
+      // участник не на стартовой кнопке:
+      trace1.state=NOT_WORK;
+      trace1.time=0;
+      sprintf(trace1.status,"not_on_start_button");
+      print_result(trace1);
+    }
+    if (trace2.state==ON_START)
     {
       trace2.state=START;
     }
+    else
+    {
+      // участник не на стартовой кнопке:
+      trace2.state=NOT_WORK;
+      trace2.time=0;
+      sprintf(trace2.status,"not_on_start_button");
+      print_result(trace2);
+    }
   }
+  else
+  {
+#ifdef DEBUG
+    char debug_buf[256]="";
+    sprintf(debug_buf,"trace:0;result:DEBUG unknown command - '%s';time_ms:0",buf);  
+    Serial.println(debug_buf); 
+#endif
+    return false;
+  }
+  return true;
 }
 
 void loop(){
@@ -307,7 +333,7 @@ void loop(){
   char debug_buf[256]="";
   int button1State = getStatusKey(TRACE_1_START_BUTTON);
   int button2State = getStatusKey(TRACE_1_STOP_BUTTON);
-  sprintf(debug_buf,"trace:%d;result:DEBUG key1=%d, key2=%d;time_ms:0",trace1.id, trace1.state,button1State, button2State);  
+  sprintf(debug_buf,"trace:%d;result:DEBUG key1=%d, key2=%d;time_ms:0",trace1.id, button1State, button2State);  
   Serial.println(debug_buf); 
   delay(DEBUG_SLEEP);
 #endif
