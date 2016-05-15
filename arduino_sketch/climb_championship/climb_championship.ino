@@ -1,3 +1,7 @@
+// Отладка (логи выводятся в консоль):
+//#define DEBUG 1
+#define DEBUG_SLEEP 500
+
 // Уровень сигнала срабатывания кнопки (0-1023):
 #define STAGE_LEVEL 950
 
@@ -20,9 +24,6 @@
 #define TRACE_1_ID 0
 #define TRACE_2_ID 1
 
-// Отладка (логи выводятся в консоль):
-//#define DEBUG 1
-#define DEBUG_SLEEP 500
 
 // служебные константы:
 #define ON 1
@@ -243,16 +244,17 @@ int serialRead(void)
       if (serialReadBufIndex < sizeof(serialReadBuf) )
       {
         serialReadBuf[serialReadBufIndex]=Serial.read();
+        //Serial.write(serialReadBuf[serialReadBufIndex]);
         if(serialReadBuf[serialReadBufIndex]=='\n')
         {
           // конец переданной строки
           serialReadBuf[serialReadBufIndex]=0;
 
-//#ifdef DEBUG
-        char debug_buf[1024]="";
+#ifdef DEBUG
+        char debug_buf[255]="";
         sprintf(debug_buf,"trace:0;result:DEBUG success read serial data - '%s', serialReadBufIndex='%d';time_ms:0",serialReadBuf,serialReadBufIndex);  
         Serial.println(debug_buf); 
-//#endif
+#endif
           serialReadBufIndex=0;
           return true;
         }
@@ -264,12 +266,12 @@ int serialRead(void)
       else
       {
         // переполнение буфера
-//#ifdef DEBUG
-        char debug_buf[1024]="";
+#ifdef DEBUG
+        char debug_buf[255]="";
         serialReadBuf[serialReadBufIndex-1]=0;
         sprintf(debug_buf,"trace:0;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0",serialReadBuf);  
         Serial.println(debug_buf); 
-//#endif
+#endif
 
       }
     }
@@ -288,8 +290,14 @@ int execCommand(char *buf)
   else if (!strcasecmp(buf,"start"))
   {
     // start
-    trace1.state=START;
-    trace2.state=START;
+    if (trace1.state!=FALSH_START)
+    {
+      trace1.state=START;
+    }
+    if (trace2.state!=FALSH_START)
+    {
+      trace2.state=START;
+    }
   }
 }
 
