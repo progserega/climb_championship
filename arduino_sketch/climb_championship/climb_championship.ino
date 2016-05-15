@@ -39,6 +39,9 @@ enum states {
   FALSH_START=5
 } st;
 
+char serialReadBuf[255]="";
+int serialReadBufIndex=0;
+
 struct traceStruct {
   int id; // ID трассы
   int state; // текущее состояние STATE-машины трассы (см. enum states)
@@ -194,9 +197,54 @@ void setup() {
   pinMode(trace2.ledPin, OUTPUT);      
 }
 
+int serialRead(void)
+{
+  int num = Serial.available();
+  if(num > 0)
+  {
+    for(int index=0;index<num;index++)
+    {
+      // проверка на переполнение буфера
+      if (serialReadBufIndex < sizeof(serialReadBuf) )
+      {
+        serialReadBuf[serialReadBufIndex]=Serial.read();
+        if(serialReadBuf[serialReadBufIndex]=='\n')
+        {
+          // конец переданной строки
+          serialReadBuf[serialReadBufIndex]=0;
+          serialReadBufIndex=0;
+#ifdef DEBUG
+        char debug_buf[1024]="";
+        sprintf(debug_buf,"trace:%d;result:DEBUG success read serial data - '%s';time_ms:0",serialReadBuf);  
+        Serial.println(debug_buf); 
+#endif
 
+          return true;
+        }
+        else
+        {
+          serialReadBufIndex++;
+        }
+      }
+      else
+      {
+        // переполнение буфера
+#ifdef DEBUG
+        char debug_buf[1024]="";
+        serialReadBuf[serialReadBufIndex-1]=0;
+        sprintf(debug_buf,"trace:%d;result:DEBUG serialReadBuf is too small! readed data was - '%s';time_ms:0",serialReadBuf);  
+        Serial.println(debug_buf); 
+#endif
 
+      }
+    }
+  }
+  return false;
+}
 
+int execCommand(char *buf)
+{
+}
 
 void loop(){
 
@@ -204,7 +252,7 @@ void loop(){
   char debug_buf[256]="";
   int button1State = getStatusKey(TRACE_1_START_BUTTON);
   int button2State = getStatusKey(TRACE_1_STOP_BUTTON);
-  sprintf(debug_buf,"trace:%d; result:DEBUG key1=%d, key2=%d; time_ms:0",trace1.id, trace1.state,button1State, button2State);  
+  sprintf(debug_buf,"trace:%d;result:DEBUG key1=%d, key2=%d;time_ms:0",trace1.id, trace1.state,button1State, button2State);  
   Serial.println(debug_buf); 
   delay(DEBUG_SLEEP);
 #endif
@@ -215,5 +263,9 @@ void loop(){
   if(checkStateMachine(trace2) == SUCCESS)
   {
     print_result(trace2);
+  }
+  if(serialRead())
+  {
+    execCommand(serialReadBuf);
   }
 }
