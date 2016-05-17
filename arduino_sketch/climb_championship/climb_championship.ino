@@ -144,7 +144,7 @@ int checkStateMachine(struct traceStruct &trace)
 #endif
       //trace.state = NOT_WORK;
       // result:
-      
+      break;
     }
     case START:
     {
