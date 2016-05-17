@@ -21,8 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
     on_pushButton_update_serialport_list_released();
     ui->start_button->setDisabled(true);
     // Связываем обработчики с событиями в последлвательном порте:
-//    connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::handleNewSerialData);
-    //connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData(QByteArray *)));
     connect(serialPort, SIGNAL(readyRead()), this, SLOT(handleNewSerialData()));
     connect(serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),this, &MainWindow::handleSerialError);
 
@@ -50,8 +48,7 @@ int MainWindow::appendResult(resultData *data)
     result->scrollToBottom();
 
     QTableWidgetItem *item = new QTableWidgetItem();
-    //item->setText(tr("Участник %1").arg(data->trace));
-    item->setText(tr("Участник %1").arg(rowNum+1));
+    item->setText(tr("Sportsmen %1").arg(rowNum+1));
     result->setItem(rowNum,0,item);
 
     item = new QTableWidgetItem();
@@ -60,14 +57,14 @@ int MainWindow::appendResult(resultData *data)
     result->setItem(rowNum,1,item);
 
     item = new QTableWidgetItem();
-    item->setText(tr("%1 сек.").arg(((float)data->time)/1000));
+    item->setText(tr("%1 sec.").arg(((float)data->time)/1000));
     item->setFlags(Qt::NoItemFlags);// Qt::ItemIsEditable);
     result->setItem(rowNum,2,item);
 
     // lcd
 
     //lcd->display(data->time);
-    lcd->display(tr("%1").arg(((float)data->time)/1000));
+    lcd->display(QString("%1").arg(((float)data->time)/1000));
 
     return true;
 }
@@ -126,7 +123,23 @@ int MainWindow::parseSerialData(QString *data)
                 }
                 else if (key == "result")
                 {
-                    (*(*resultsLast)->status)=val;
+                    // берём перевод состояний:
+                    if (val == "success")
+                    {
+                        (*(*resultsLast)->status)=tr("success","success trace by sportsmen");
+                    }
+                    else if (val == "falsh_start")
+                    {
+                        (*(*resultsLast)->status)=tr("falsh start","falsh start trace by sportsmen");
+                    }
+                    else if (val == "not_on_start_button")
+                    {
+                        (*(*resultsLast)->status)=tr("not on start button","spotrtsmen not stay on start position, when start command sayed");
+                    }
+                    else
+                    {
+                        (*(*resultsLast)->status)=val;
+                    }
                 }
                 else if (key == "current_log_ms")
                 {
@@ -169,7 +182,7 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError serialPortError)
         qDebug() << QTime::currentTime() << ": " << "error read from serial port: " << serialPort->errorString();
 
         QMessageBox *pmbx = new QMessageBox;
-        pmbx->setText(QObject::tr("Ошибка чтения из порта : %1").arg(serialPort->errorString())) ;
+        pmbx->setText(QObject::tr("Error read from port: %1").arg(serialPort->errorString())) ;
         //pmbx->setInformativeText("Пожалуйста, выбирите рабочий порт");
         pmbx->setIcon(QMessageBox::Critical);
         pmbx->setStandardButtons(QMessageBox::Ok | QMessageBox::Escape);
@@ -211,8 +224,8 @@ void MainWindow::initSerial(QString serialPortName)
     if (!serialPort->open(QIODevice::ReadWrite))
     {
         QMessageBox *pmbx = new QMessageBox;
-        pmbx->setText("Ошибка подключения к порту: " + serialPortName);
-        pmbx->setInformativeText("Пожалуйста, выбирите рабочий порт");
+        pmbx->setText(tr("Error connect to port: ") + serialPortName);
+        pmbx->setInformativeText(tr("Please, select work serial port"));
         pmbx->setIcon(QMessageBox::Critical);
         pmbx->setStandardButtons(QMessageBox::Ok | QMessageBox::Escape);
         pmbx->setDefaultButton(QMessageBox::Ok);
@@ -250,6 +263,9 @@ void MainWindow::on_start_button_released()
     // send внимание to arduino
     serialPort->write("vnimanie\n");
 
+    // временно блокируем кнопку старта:
+    ui->start_button->setEnabled(false);
+
     // "Внимание":
     QSound::play("ring1.wav");
 
@@ -262,4 +278,7 @@ void MainWindow::startLap()
     // send start to arduino
     serialPort->write("start\n");
     QSound::play("ring2.wav");
+
+    // разблокируем кнопку старта:
+    ui->start_button->setEnabled(true);
 }

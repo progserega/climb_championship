@@ -20,6 +20,9 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 
+TRANSLATIONS += climb_championship_ru.ts
+
 OTHER_FILES += \
     ring2.wav \
-    ring1.wav
+    ring1.wav \
+    climb_championship_ru.ts

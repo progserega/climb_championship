@@ -29,7 +29,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Выбор последовательного порта</string>
+          <string>Select serial port</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -42,14 +42,14 @@
        <item>
         <widget class="QPushButton" name="pushButton_update_serialport_list">
          <property name="text">
-          <string>Обновить список портов</string>
+          <string>Update list of serial ports</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_connect_to_serialport">
          <property name="text">
-          <string>подключиться</string>
+          <string>connect</string>
          </property>
         </widget>
        </item>
@@ -62,7 +62,7 @@
          <item>
           <widget class="QLabel" name="label_trace0">
            <property name="text">
-            <string>Трасса 1</string>
+            <string>Trace 1</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -79,7 +79,7 @@
          <item>
           <widget class="QLabel" name="label_trace1">
            <property name="text">
-            <string>Трасса 2</string>
+            <string>Trace 2</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -98,7 +98,7 @@
        <item>
         <widget class="QPushButton" name="start_button">
          <property name="text">
-          <string>Старт</string>
+          <string>Start</string>
          </property>
         </widget>
        </item>
