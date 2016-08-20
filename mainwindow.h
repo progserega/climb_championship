@@ -47,6 +47,7 @@ private:
     QByteArray *serialBuffer;
     QString *serialReaded;
     QTimer *timer;
+    QWidget *window;
 
     void initSerial(QString serialPortName);
     int parseSerialData(QString *data);

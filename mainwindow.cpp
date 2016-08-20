@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Главный виджет на всё окно:
+    window = new QWidget();
+    window->setLayout(ui->verticalLayout_3);
+    setCentralWidget(window);
+
     serialPort = new QSerialPort;
     serialBuffer = new QByteArray;
     serialReaded = new QString;
@@ -26,11 +31,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(startLap()));
+
+    // масштабирование таблицы:
+    ui->result_table0->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->result_table0->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->result_table0->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+
+    ui->result_table1->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->result_table1->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->result_table1->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete window;
 }
 
 int MainWindow::appendResult(resultData *data)
@@ -88,6 +103,8 @@ int MainWindow::parseSerialData(QString *data)
 {
     QString cmd;
     qDebug() << __FUNCTION__ << ":" << __LINE__ << "input data: '" << *data << "'";
+    bool successParseCommand=false;
+
     while(getNextCommand(data,&cmd))
     {
         qDebug() << __FUNCTION__ << ":" << __LINE__ << "current data: '" << *data << "'";
@@ -109,6 +126,12 @@ int MainWindow::parseSerialData(QString *data)
             {
                 qDebug() << "item[" << index << "]" << items.at(index);
                 QStringList values = items.at(index).split(":");
+                if(values.size()<2)
+                {
+                    // неверная команда (нет пары ключ-значение) - пропуск:
+                    qDebug() << "error command. No pars ket:value. Skip command.";
+                    continue;
+                }
                 QString key = values.at(0);
                 QString val = values.at(1);
 
@@ -116,10 +139,12 @@ int MainWindow::parseSerialData(QString *data)
                 if(key=="trace")
                 {
                     (*resultsLast)->trace=val.toInt();
+                    successParseCommand=true;
                 }
                 else if (key == "time_ms")
                 {
                     (*resultsLast)->time=val.toInt();
+                    successParseCommand=true;
                 }
                 else if (key == "result")
                 {
@@ -140,15 +165,18 @@ int MainWindow::parseSerialData(QString *data)
                     {
                         (*(*resultsLast)->status)=val;
                     }
+                    successParseCommand=true;
                 }
                 else if (key == "current_log_ms")
                 {
                     (*resultsLast)->change_time_arduino=val.toInt();
+                    successParseCommand=true;
                 }
             }
             qDebug() << "== New result: ==\ntrace:" << (*resultsLast)->trace << "\nstatus: " << (*(*resultsLast)->status) << "\nTime: " << (*resultsLast)->time << "\nChange time arduino:" << (*resultsLast)->change_time_arduino << "\n==============";
             // добавляем запись в отчёт:
-            appendResult(*resultsLast);
+            if(successParseCommand)
+                appendResult(*resultsLast);
         }
     if(*data == "")
     {
